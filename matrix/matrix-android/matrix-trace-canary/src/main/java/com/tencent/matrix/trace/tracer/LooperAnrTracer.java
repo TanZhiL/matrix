@@ -53,10 +53,12 @@ public class LooperAnrTracer extends Tracer {
     private final AnrHandleTask anrTask = new AnrHandleTask();
     private final LagHandleTask lagTask = new LagHandleTask();
     private boolean isAnrTraceEnable;
+    private int evilMethodStack;
 
-    public LooperAnrTracer(TraceConfig traceConfig) {
+    public LooperAnrTracer(TraceConfig traceConfig, int evilMethodStack) {
         this.traceConfig = traceConfig;
         this.isAnrTraceEnable = traceConfig.isAnrTraceEnable();
+        this.evilMethodStack = evilMethodStack;
     }
 
     @Override
@@ -197,7 +199,7 @@ public class LooperAnrTracer extends Tracer {
             LinkedList<MethodItem> stack = new LinkedList();
             if (data.length > 0) {
                 TraceDataUtils.structuredDataToStack(data, stack, true, curTime);
-                TraceDataUtils.trimStack(stack, Constants.TARGET_EVIL_METHOD_STACK, new TraceDataUtils.IStructuredDataFilter() {
+                TraceDataUtils.trimStack(stack, evilMethodStack, new TraceDataUtils.IStructuredDataFilter() {
                     @Override
                     public boolean isFilter(long during, int filterCount) {
                         return during < filterCount * Constants.TIME_UPDATE_CYCLE_MS;
@@ -210,8 +212,8 @@ public class LooperAnrTracer extends Tracer {
 
                     @Override
                     public void fallback(List<MethodItem> stack, int size) {
-                        MatrixLog.w(TAG, "[fallback] size:%s targetSize:%s stack:%s", size, Constants.TARGET_EVIL_METHOD_STACK, stack);
-                        Iterator iterator = stack.listIterator(Math.min(size, Constants.TARGET_EVIL_METHOD_STACK));
+                        MatrixLog.w(TAG, "[fallback] size:%s targetSize:%s stack:%s", size, evilMethodStack, stack);
+                        Iterator iterator = stack.listIterator(Math.min(size, evilMethodStack));
                         while (iterator.hasNext()) {
                             iterator.next();
                             iterator.remove();

@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 apply from: rootProject.file('gradle/WeChatNativeDepend.gradle')
-
+apply from:"${rootDir}${File.separator}upload_maven.gradle"
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion

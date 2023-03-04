@@ -1,0 +1,36 @@
+apply plugin: "maven"
+
+def repoUrl = "http://maven.coocaa.net:8080/nexus/content/repositories/releases/"
+
+def properties = new Properties()
+properties.load(new FileReader(file("${projectDir}${File.separator}maven_pom.properties")))
+def pkg = properties.get("packaging")
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: repoUrl) {
+            authentication(userName: "deployment",
+                    password: "Deploy@23#")
+        }
+        pom.project {
+            name properties.get("name")
+            description properties.get("description")
+            groupId properties.get("groupId")
+            artifactId properties.get("artifactId")
+            version properties.get("version")
+            packaging pkg
+        }
+    }
+}
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    if (project.hasProperty("android")) {
+        from android.sourceSets.main.java.srcDirs
+    } else {
+        from sourceSets.main.allSource
+    }
+}
+
+artifacts {
+    archives androidSourcesJar
+}

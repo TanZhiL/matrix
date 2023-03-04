@@ -49,10 +49,11 @@ public class EvilMethodTracer extends Tracer {
     private long[] queueTypeCosts = new long[3];
     private long evilThresholdMs;
     private boolean isEvilMethodTraceEnable;
-
-    public EvilMethodTracer(TraceConfig config) {
+    private int evilMethodStack;
+    public EvilMethodTracer(TraceConfig config, int evilMethodStack) {
         this.config = config;
         this.evilThresholdMs = config.getEvilThresholdMs();
+        this.evilMethodStack = evilMethodStack;
         this.isEvilMethodTraceEnable = config.isEvilMethodTraceEnable();
     }
 
@@ -142,7 +143,7 @@ public class EvilMethodTracer extends Tracer {
             LinkedList<MethodItem> stack = new LinkedList();
             if (data.length > 0) {
                 TraceDataUtils.structuredDataToStack(data, stack, true, endMs);
-                TraceDataUtils.trimStack(stack, Constants.TARGET_EVIL_METHOD_STACK, new TraceDataUtils.IStructuredDataFilter() {
+                TraceDataUtils.trimStack(stack, evilMethodStack, new TraceDataUtils.IStructuredDataFilter() {
                     @Override
                     public boolean isFilter(long during, int filterCount) {
                         return during < filterCount * Constants.TIME_UPDATE_CYCLE_MS;
@@ -155,8 +156,8 @@ public class EvilMethodTracer extends Tracer {
 
                     @Override
                     public void fallback(List<MethodItem> stack, int size) {
-                        MatrixLog.w(TAG, "[fallback] size:%s targetSize:%s stack:%s", size, Constants.TARGET_EVIL_METHOD_STACK, stack);
-                        Iterator iterator = stack.listIterator(Math.min(size, Constants.TARGET_EVIL_METHOD_STACK));
+                        MatrixLog.w(TAG, "[fallback] size:%s targetSize:%s stack:%s", size, evilMethodStack, stack);
+                        Iterator iterator = stack.listIterator(Math.min(size, evilMethodStack));
                         while (iterator.hasNext()) {
                             iterator.next();
                             iterator.remove();

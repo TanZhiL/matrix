@@ -49,6 +49,7 @@ public class Constants {
 
     public static final int DEFAULT_RELEASE_BUFFER_DELAY = 10 * 1000;
     public static final int TARGET_EVIL_METHOD_STACK = 30;
+    public static final String  clicfg_matrix_trace_target_evil_method_stack = "clicfg_matrix_trace_target_evil_method_stack";
     public static final int MAX_LIMIT_ANALYSE_STACK_KEY_NUM = 10;
 
     public static final int LIMIT_WARM_THRESHOLD_MS = 5 * 1000;

@@ -24,6 +24,7 @@ import com.tencent.matrix.plugin.Plugin;
 import com.tencent.matrix.plugin.PluginListener;
 import com.tencent.matrix.trace.config.SharePluginInfo;
 import com.tencent.matrix.trace.config.TraceConfig;
+import com.tencent.matrix.trace.constants.Constants;
 import com.tencent.matrix.trace.core.AppMethodBeat;
 import com.tencent.matrix.trace.core.UIThreadMonitor;
 import com.tencent.matrix.trace.tracer.EvilMethodTracer;
@@ -70,14 +71,17 @@ public class TracePlugin extends Plugin {
         } else if (sdkInt >= Build.VERSION_CODES.O) {
             supportFrameMetrics = true;
         }
-
-        looperAnrTracer = new LooperAnrTracer(traceConfig);
+        int evilMethodStack = Constants.TARGET_EVIL_METHOD_STACK;
+        if (traceConfig.dynamicConfig != null) {
+            evilMethodStack = traceConfig.dynamicConfig.get(Constants.clicfg_matrix_trace_target_evil_method_stack, Constants.TARGET_EVIL_METHOD_STACK);
+        }
+        looperAnrTracer = new LooperAnrTracer(traceConfig, evilMethodStack);
 
         frameTracer = new FrameTracer(traceConfig, supportFrameMetrics);
 
-        evilMethodTracer = new EvilMethodTracer(traceConfig);
+        evilMethodTracer = new EvilMethodTracer(traceConfig, evilMethodStack);
 
-        startupTracer = new StartupTracer(traceConfig);
+        startupTracer = new StartupTracer(traceConfig, evilMethodStack);
     }
 
     @Override

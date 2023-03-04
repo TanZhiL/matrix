@@ -78,10 +78,12 @@ public class StartupTracer extends Tracer implements IAppMethodBeatListener, Act
     private long coldStartupThresholdMs;
     private long warmStartupThresholdMs;
     private boolean isHasActivity;
+    private int evilMethodStack;
 
 
-    public StartupTracer(TraceConfig config) {
+    public StartupTracer(TraceConfig config, int evilMethodStack) {
         this.config = config;
+        this.evilMethodStack = evilMethodStack;
         this.isStartupEnable = config.isStartupEnable();
         this.splashActivities = config.getSplashActivities();
         this.coldStartupThresholdMs = config.getColdStartupThresholdMs();
@@ -237,7 +239,7 @@ public class StartupTracer extends Tracer implements IAppMethodBeatListener, Act
             LinkedList<MethodItem> stack = new LinkedList();
             if (data.length > 0) {
                 TraceDataUtils.structuredDataToStack(data, stack, false, -1);
-                TraceDataUtils.trimStack(stack, Constants.TARGET_EVIL_METHOD_STACK, new TraceDataUtils.IStructuredDataFilter() {
+                TraceDataUtils.trimStack(stack, evilMethodStack, new TraceDataUtils.IStructuredDataFilter() {
                     @Override
                     public boolean isFilter(long during, int filterCount) {
                         return during < filterCount * Constants.TIME_UPDATE_CYCLE_MS;
@@ -250,8 +252,8 @@ public class StartupTracer extends Tracer implements IAppMethodBeatListener, Act
 
                     @Override
                     public void fallback(List<MethodItem> stack, int size) {
-                        MatrixLog.w(TAG, "[fallback] size:%s targetSize:%s stack:%s", size, Constants.TARGET_EVIL_METHOD_STACK, stack);
-                        Iterator iterator = stack.listIterator(Math.min(size, Constants.TARGET_EVIL_METHOD_STACK));
+                        MatrixLog.w(TAG, "[fallback] size:%s targetSize:%s stack:%s", size, evilMethodStack, stack);
+                        Iterator iterator = stack.listIterator(Math.min(size, evilMethodStack));
                         while (iterator.hasNext()) {
                             iterator.next();
                             iterator.remove();
